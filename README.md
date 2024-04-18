@@ -1,1 +1,1 @@
-# sentiment-classification
+# DeepSentiment
