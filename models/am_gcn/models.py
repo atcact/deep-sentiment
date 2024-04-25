@@ -18,3 +18,11 @@ class Attention(tf.keras.Model):
     def forward(self, inputs):
         pass
     
+class AMGCN(tf.keras.Model):
+    def __init__(self, **kwargs):
+        super(AMGCN, self).__init__()
+
+        
+        
+    def forward(self, inputs):
+        pass
