@@ -1,28 +1,66 @@
 import pyarrow.parquet as pq
 import tensorflow as tf
 import numpy as np
+from keras.preprocessing import sequence
+from keras.models import Sequential
+from keras.layers import Dense, Embedding, GlobalMaxPooling1D, Flatten, Conv1D, Dropout, Activation
+from keras.preprocessing.text import Tokenizer
+from keras.utils import pad_sequences
 
-def preprocess(path1, path2):
-    """takes in the dataset and returns the train_input, train_labels,test_input, test_labels in this order"""
-    train = pq.ParquetDataset('test-00000-of-00001.parquet')
-    test = pq.ParquetDataset('test-00000-of-00001.parquet')
 
-    train_data= train.read().to_pandas()
-    train_input = train_data.iloc[:,0]
-    train_labels = train_data.iloc[:,1]
+VOCAB_SIZE = 20000
+MAX_LEN = 100
 
-    print('train input: ',train_input)
-    print('train labels: ', train_labels) # to see how the dataset looks like
+def preprocess(path):
+    """takes in the dataset and returns the train_input, train_labels, test_input, test_labels in this order"""
+    dataset = pq.ParquetDataset(path)
+    
+    data = dataset.read().to_pandas()
+    inputs = data.iloc[:,0]
+    labels = data.iloc[:,1]
 
-    test_data= test.read().to_pandas()
-    test_input = test_data.iloc[:,0]
-    test_labels = test_data.iloc[:,1]
+    # print("inputs: ", inputs)
+    # print("labels: ", labels)
+    # print('First sample before preprocessing: \n', inputs[0], '\n')
 
-    # Shuffling
-    indices = tf.random.shuffle(np.arange(len(train_input)))
-    test_input = tf.gather(test_input, indices)
-    test_labels = tf.gather(test_labels, indices)
-    train_input = tf.gather(train_input, indices)
-    train_labels = tf. gather(train_labels, indices)
-    return train_input, train_labels, test_input, test_labels
-preprocess('test-00000-of-00001.parquet','test-00000-of-00001.parquet')
+    tokenizer = Tokenizer(num_words=VOCAB_SIZE)
+    tokenizer.fit_on_texts(inputs)
+    
+    inputs = tokenizer.texts_to_sequences(inputs)
+    inputs = pad_sequences(inputs, maxlen=MAX_LEN, padding="post", value=0)
+
+    # print('First sample after preprocessing: \n', inputs[0], '\n')
+    return inputs, labels
+    
+def shuffle(inputs, labels):
+    indices = tf.random.shuffle(np.arange(len(inputs)))
+    inputs = tf.gather(inputs, indices)
+    labels = tf. gather(labels, indices)
+    return inputs, labels
+
+
+def train_test_split(X, y, test_size=0.2):
+    train_size = int(len(X) * (1 - test_size))
+    X_train, X_test = X[:train_size], X[train_size:]
+    y_train, y_test = y[:train_size], y[train_size:]
+    return X_train, X_test, y_train, y_test
+
+def merge(path1, path2, target_path):
+    try:
+        file1 = pq.read_table(path1)
+        file2 = pq.read_table(path2)
+        
+        with pq.ParquetWriter(target_path,
+                file1.schema,
+                version='2.0',
+                compression='gzip',
+                use_dictionary=True,
+                data_page_size=2097152, #2MB
+                write_statistics=True) as writer:
+            writer.write_table(file1)
+            writer.write_table(file2)
+    except Exception as e:
+        print(e)
+
+# merge('train-00000-of-00001.parquet','test-00000-of-00001.parquet', 'movie_review.parquet')
+# preprocess('data/movie_review.parquet')
