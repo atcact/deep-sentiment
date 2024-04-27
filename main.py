@@ -24,14 +24,16 @@ def main(args):
     train_inputs, test_inputs, train_labels, test_labels = train_test_split(inputs, labels, test_size=0.2)
     if args.model == "rnn":
         model = RNN()
-    elif args.model == "am_gcn":
-        model = AMGCN()
+    elif args.model == "amgcn":
+        model = AMGCN(nfeat=300, nclass=2, nhid1=256, nhid2=128, n=2, dropout=0.5)
+    # TODO: Add more models
     else:
         raise ValueError("Invalid model name")
     
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    
     # Train the model
-    model.fit(train_inputs, train_labels, batch_size=32, epochs=10)
+    model.fit(train_inputs, train_labels, batch_size=32, epochs=5) # Update parameters
 
     # Evaluate the model
     loss, accuracy = model.evaluate(test_inputs, test_labels)
