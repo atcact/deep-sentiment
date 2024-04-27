@@ -6,7 +6,9 @@ from keras.models import Sequential
 from keras.layers import Dense, Embedding, GlobalMaxPooling1D, Flatten, Conv1D, Dropout, Activation
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
-
+import nltk 
+from nltk.corpus import stopwords
+from utils import loadWord2Vec, clean_str
 
 VOCAB_SIZE = 20000
 MAX_LEN = 100
@@ -22,7 +24,31 @@ def preprocess(path):
     # print("inputs: ", inputs)
     # print("labels: ", labels)
     # print('First sample before preprocessing: \n', inputs[0], '\n')
+    nltk.download('stopwords')
+    stop_words = set(stopwords.words('english'))
+    word_freq = {}
+    for input in inputs:
+        temp1 = clean_str(input)
+        words1 = temp1.split()
+        for word in words1:
+            if word in word_freq:
+                word_freq[word] += 1
+            else:
+                word_freq[word] = 1
+    clean_docs = []
 
+    for input in inputs:
+        temp = clean_str(input)
+        temp = temp.split()
+        words = []
+        for word in temp:
+            if word not in stop_words and word_freq[word] >= 10:
+                words.append(word)
+        doc_str = ' '.join(words).strip()
+        clean_docs.append(doc_str)
+
+    inputs = clean_docs
+    labels = labels.values.tolist()
     tokenizer = Tokenizer(num_words=VOCAB_SIZE)
     tokenizer.fit_on_texts(inputs)
     
@@ -30,7 +56,8 @@ def preprocess(path):
     inputs = pad_sequences(inputs, maxlen=MAX_LEN, padding="post", value=0)
 
     # print('First sample after preprocessing: \n', inputs[0], '\n')
-    return inputs, labels
+    print('inputs',tf.convert_to_tensor(inputs), 'labels', tf.convert_to_tensor(labels))
+    return tf.convert_to_tensor(inputs), tf.convert_to_tensor(labels)
     
 def shuffle(inputs, labels):
     indices = tf.random.shuffle(np.arange(len(inputs)))
@@ -63,4 +90,4 @@ def merge(path1, path2, target_path):
         print(e)
 
 # merge('train-00000-of-00001.parquet','test-00000-of-00001.parquet', 'movie_review.parquet')
-# preprocess('data/movie_review.parquet')
+preprocess('data/movie_review.parquet')
