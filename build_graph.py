@@ -9,9 +9,14 @@ def build_graph(path,window_size, embedding_dim ):
     
     inputs, labels = preprocess(path)    
     #build adjacency matrix. Words are already converted to a corresponding number in preprocess
-    
+    edge_features = []
     adj_matrix = tf.zeros((VOCAB_SIZE,VOCAB_SIZE))
+    print(VOCAB_SIZE)
+    print(embedding_dim)
+    word_vectors = tf.random.normal( (VOCAB_SIZE,embedding_dim),0, 1)
+    print(len(inputs))
     for input in inputs:
+        print('running')
         for i in range(len(input-window_size)):
             cur_word = input[i]
             words_window = input[i+1:i+window_size+1]
@@ -19,9 +24,11 @@ def build_graph(path,window_size, embedding_dim ):
                 adj_matrix = tf.tensor_scatter_nd_add(adj_matrix, 
                                                    indices=[[cur_word, word], [word, cur_word]], 
                                                    updates=[1, 1])
-    word_vectors = tf.random.uniform(-0.01, 0.01, (VOCAB_SIZE,embedding_dim))
+                edge_feature = word_vectors[cur_word] - word_vectors[word]
+                edge_features.append(edge_feature)
+    
+    print(adj_matrix)
+    return tf.sparse.from_dense(adj_matrix),word_vectors, edge_features
 
-    return tf.sparse.from_dense(adj_matrix),word_vectors
 
-
-build_graph('data/movie_review.parquet', 20)
+build_graph('data/movie_review.parquet', 10,100)
