@@ -37,10 +37,10 @@ def main(args):
     model.save('model_' + args.model + '.h5')
     # Train & evaluate the model
     if args.model == "mccnn":
-        model.fit([train_inputs, train_inputs, train_inputs], train_labels, batch_size=32, epochs=3) # Update parameters
+        model.fit([train_inputs, train_inputs, train_inputs], train_labels, batch_size=8, epochs=3) # Update parameters
         loss, accuracy = model.evaluate([test_inputs, test_inputs, test_inputs], test_labels)
     else:
-        model.fit(train_inputs, train_labels, batch_size=32, epochs=5)
+        model.fit(train_inputs, train_labels, batch_size=8, epochs=3)
         loss, accuracy = model.evaluate(test_inputs, test_labels)
         
     print(f'Test loss: {loss:.3f}, Test accuracy: {accuracy:.3f}')
