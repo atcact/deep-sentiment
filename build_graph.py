@@ -14,7 +14,8 @@ def build_graph(path,window_size, embedding_dim ):
     print(VOCAB_SIZE)
     print(embedding_dim)
     word_vectors = tf.random.normal( (VOCAB_SIZE,embedding_dim),0, 1)
-    print(len(inputs))
+
+
     for input in inputs:
         print('running')
         for i in range(len(input-window_size)):
@@ -26,8 +27,9 @@ def build_graph(path,window_size, embedding_dim ):
                                                    updates=[1, 1])
                 edge_feature = word_vectors[cur_word] - word_vectors[word]
                 edge_features.append(edge_feature)
-    
     print(adj_matrix)
+    print(edge_feature)
+    print(word_vectors)
     return tf.sparse.from_dense(adj_matrix),word_vectors, edge_features
 
 
