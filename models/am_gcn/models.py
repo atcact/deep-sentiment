@@ -1,5 +1,5 @@
 import tensorflow as tf
-from models.am_gcn.layers import GraphConvolution
+from .layers import GraphConvolution
 
 class GCN(tf.keras.Model):
     def __init__(self, nfeat, nhid, out, dropout):
