@@ -11,10 +11,10 @@ from nltk.corpus import stopwords
 from utils import loadWord2Vec, clean_str
 
 VOCAB_SIZE = 20000
-MAX_LEN = 100
+MAX_LEN = 50
 
 def preprocess(path):
-    """takes in the dataset and returns the train_input, train_labels, test_input, test_labels in this order"""
+    """takes in the dataset and returns the tokenized inputs, inputs, and labels as tensors"""
     dataset = pq.ParquetDataset(path)
     
     data = dataset.read().to_pandas()
@@ -52,14 +52,15 @@ def preprocess(path):
     tokenizer = Tokenizer(num_words=VOCAB_SIZE)
     tokenizer.fit_on_texts(inputs)
     
-    inputs = tokenizer.texts_to_sequences(inputs)
-    inputs = pad_sequences(inputs, maxlen=MAX_LEN, padding="post", value=0)
+    tokenized_inputs = tokenizer.texts_to_sequences(inputs)
+    tokenized_inputs = pad_sequences(inputs, maxlen=MAX_LEN, padding="post", value=0)
 
     # print('First sample after preprocessing: \n', inputs[0], '\n')
-    print('inputs',tf.convert_to_tensor(inputs), 'labels', tf.convert_to_tensor(labels))
-    return tf.convert_to_tensor(inputs), tf.convert_to_tensor(labels)
+    # print('inputs',tf.convert_to_tensor(inputs), 'labels', tf.convert_to_tensor(labels))
+    return tf.convert_to_tensor(tokenized_inputs), tf.convert_to_tensor(inputs), tf.convert_to_tensor(labels) 
     
 def shuffle(inputs, labels):
+    'returns inputs and labels shuffled'
     indices = tf.random.shuffle(np.arange(len(inputs)))
     inputs = tf.gather(inputs, indices)
     labels = tf. gather(labels, indices)
@@ -67,12 +68,14 @@ def shuffle(inputs, labels):
 
 
 def train_test_split(X, y, test_size=0.2):
+    'takes in inputs and labels, and returns train_inputs, test_inputs, train_labels, test_labels'
     train_size = int(len(X) * (1 - test_size))
     X_train, X_test = X[:train_size], X[train_size:]
     y_train, y_test = y[:train_size], y[train_size:]
     return X_train, X_test, y_train, y_test
 
 def merge(path1, path2, target_path):
+
     try:
         file1 = pq.read_table(path1)
         file2 = pq.read_table(path2)
