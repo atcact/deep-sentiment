@@ -58,15 +58,9 @@ def feature_graph(path):
     tokenized_inputs, inputs, labels = preprocess(path)  
     word2vec = gensim.models.Word2Vec(inputs, vector_size=100,window=20)
     similarity_matrix = cosine_similarity(word2vec)
-    feature_matrix = []
-    for i in range(len(VOCAB_SIZE)):
-        print('progress',i,'/',len(VOCAB_SIZE))
-        for j in range(len(VOCAB_SIZE)):
-            if i != j:
-                feature_matrix[i, j] = similarity_matrix[i, j]
-            if i == j:
-                feature_matrix[i,j] = 0
-    feature_matrix = np.asarray(feature_graph)
+    feature_matrix = np.fill_diagonal(similarity_matrix, 0)
+
+    feature_matrix = np.asarray(feature_matrix)
     with open('feature_matrix.pkl', 'wb') as f:
         pickle.dump(feature_matrix,f)
     return np.array(feature_matrix)
