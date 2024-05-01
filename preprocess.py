@@ -53,7 +53,7 @@ def preprocess(path):
     tokenizer.fit_on_texts(inputs)
     
     tokenized_inputs = tokenizer.texts_to_sequences(inputs)
-    tokenized_inputs = pad_sequences(inputs, maxlen=MAX_LEN, padding="post", value=0)
+    tokenized_inputs = pad_sequences(tokenized_inputs, maxlen=MAX_LEN, padding="post", value=0)
 
     # print('First sample after preprocessing: \n', inputs[0], '\n')
     # print('inputs',tf.convert_to_tensor(inputs), 'labels', tf.convert_to_tensor(labels))
