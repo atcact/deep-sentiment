@@ -54,12 +54,13 @@ def build_graph(path,window_size):
 
     # tf.io.write_file('graph.txt', adj_saved)
 def feature_graph(path):
-    'builds a feature graph'
+    'builds a feature graph given a dataset'
     tokenized_inputs, inputs, labels = preprocess(path)  
     word2vec = gensim.models.Word2Vec(inputs, vector_size=100,window=20)
     similarity_matrix = cosine_similarity(word2vec)
     feature_matrix = []
     for i in range(len(VOCAB_SIZE)):
+        print('progress',i,'/',len(VOCAB_SIZE))
         for j in range(len(VOCAB_SIZE)):
             if i != j:
                 feature_matrix[i, j] = similarity_matrix[i, j]
