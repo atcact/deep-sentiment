@@ -57,7 +57,7 @@ def preprocess(path):
 
     # print('First sample after preprocessing: \n', inputs[0], '\n')
     # print('inputs',tf.convert_to_tensor(inputs), 'labels', tf.convert_to_tensor(labels))
-    return tf.convert_to_tensor(tokenized_inputs), tf.convert_to_tensor(inputs), tf.convert_to_tensor(labels) 
+    return tf.convert_to_tensor(tokenized_inputs),inputs, tf.convert_to_tensor(labels) 
     
 def shuffle(inputs, labels):
     'returns inputs and labels shuffled'
