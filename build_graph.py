@@ -51,7 +51,6 @@ def feature_graph(path):
         pickle.dump(feature_matrix, f)
     return feature_matrix
 
-    
 feature_graph('data/movie_review.parquet')
 # build_graph('data/movie_review.parquet', 20)
 
