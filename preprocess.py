@@ -36,7 +36,7 @@ def preprocess(path):
             else:
                 word_freq[word] = 1
     clean_docs = []
-
+    
     for input in inputs:
         temp = clean_str(input)
         temp = temp.split()
