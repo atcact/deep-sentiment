@@ -24,11 +24,11 @@ def build_graph(path,window_size):
             for word in words_window:
                 adj_matrix[cur_word, word] += 1
                 adj_matrix[word,cur_word] += 1
-    print(adj_matrix.shape)
-    print(adj_matrix)
-    adj_matrix = np.asarray(feature_graph)
+    
+    adj_matrix = np.asarray(adj_matrix)
     with open('spatial_matrix.pkl', 'wb') as f:
         pickle.dump(adj_matrix,f)
+    print(adj_matrix)
 
     # Convert the tensor to a string
     # adj_saved = tf.io.serialize_tensor(tf.Tensor(adj_matrix))
@@ -36,18 +36,20 @@ def build_graph(path,window_size):
     # tf.io.write_file('graph.txt', adj_saved)
 # creates a feature graph
 def feature_graph(path):
-    'builds a feature graph given a dataset'
-    tokenized_inputs, inputs, labels = preprocess(path)  
-    print('generate')
-    word2vec = gensim.models.Word2Vec(inputs, vector_size=100,window=20)
-    print('after')
-    similarity_matrix = cosine_similarity(word2vec.wv.vectors)
-    feature_matrix = np.fill_diagonal(similarity_matrix, 0) # make sure self similarity is 0
-
+    '''builds a feature graph given a dataset'''
+    tokenized_inputs, inputs, _ = preprocess(path)  
+    tokenized_inputs = tokenized_inputs.numpy().tolist()
+    word2vec = gensim.models.Word2Vec(tokenized_inputs, vector_size=100,window=20,max_vocab_size=VOCAB_SIZE,min_count=1)
+    print(word2vec.wv)
+    feature_matrix = cosine_similarity(word2vec.wv.vectors)
+    print(feature_matrix.shape)
+    for i in range(min(feature_matrix.shape)):
+        feature_matrix[i,i] = 0
     feature_matrix = np.asarray(feature_matrix)
+    # print(feature_matrix.shape, feature_matrix)
     with open('feature_matrix.pkl', 'wb') as f:
-        pickle.dump(feature_matrix,f)
-    return np.array(feature_matrix)
+        pickle.dump(feature_matrix, f)
+    return feature_matrix
 
     
 feature_graph('data/movie_review.parquet')
