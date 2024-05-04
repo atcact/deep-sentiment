@@ -2,6 +2,10 @@ import numpy as np
 import scipy.sparse as sp
 import tensorflow as tf
 import networkx as nx
+import pickle
+import pprint
+import json
+from preprocess import preprocess, train_test_split
 
 def common_loss(emb1, emb2):
     emb1 = emb1 - tf.reduce_mean(emb1, axis=0, keepdims=True)
@@ -19,7 +23,7 @@ def loss_dependence(emb1, emb2, dim):
     K2 = tf.matmul(emb2, emb2, transpose_b=True)
     RK1 = tf.matmul(R, K1)
     RK2 = tf.matmul(R, K2)
-    HSIC = tf.trace(tf.matmul(RK1, RK2))
+    HSIC = tf.linalg.trace(tf.matmul(RK1, RK2))
     return HSIC
 
 def accuracy(output, labels):
@@ -32,8 +36,10 @@ def sparse_mx_to_tf_sparse_tensor(sparse_mx):
     """Convert a scipy sparse matrix to a TensorFlow sparse tensor."""
     sparse_mx = sparse_mx.tocoo().astype(np.float32)
     indices = tf.convert_to_tensor(np.vstack((sparse_mx.row, sparse_mx.col)).astype(np.int64), dtype=tf.int64)
+    indices = tf.transpose(indices)
     values = tf.convert_to_tensor(sparse_mx.data, dtype=tf.float32)
-    shape = tf.convert_to_tensor(sparse_mx.shape, dtype=tf.int64)
+    shape = sparse_mx.shape
+    print(indices.shape, values.shape, shape)
     return tf.SparseTensor(indices, values, shape)
 
 def parse_index_file(filename):
@@ -89,11 +95,17 @@ def load_data(config):
 
     idx_train = tf.convert_to_tensor(idx_train, dtype=tf.int64)
     idx_test = tf.convert_to_tensor(idx_test, dtype=tf.int64)
+    
+    labels = tf.convert_to_tensor(np.array(l), dtype=tf.int64)
 
-    label = tf.convert_to_tensor(np.array(l), dtype=tf.int64)
+    return features, labels, idx_train, idx_test
 
-    return features, label, idx_train, idx_test
+def my_load_data():
+    features, labels = preprocess("data/movie_review.parquet")
+    idx_train, idx_test = train_test_split(np.arange(20000), test_size=0.2)
+    
 
+    return features, labels, idx_train, idx_test
 def load_graph(dataset, config):
     featuregraph_path = config.featuregraph_path + str(config.k) + '.txt'
 
@@ -107,6 +119,21 @@ def load_graph(dataset, config):
     sadj = sp.coo_matrix((np.ones(sedges.shape[0]), (sedges[:, 0], sedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
     sadj = sadj + sadj.T.multiply(sadj.T > sadj) - sadj.multiply(sadj.T > sadj)
     nsadj = normalize(sadj+sp.eye(sadj.shape[0]))
+    print('finish loading graph', nfadj.shape, nsadj.shape)
     nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
     nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
     return nsadj, nfadj
+
+def load_graph_to_tensor(path):
+    # data = pickle.load(open(path, 'rb'))
+    with open(path, 'rb') as f:
+        data = pickle.load(f)
+    tensor_data = tf.convert_to_tensor(data, dtype=tf.float32)
+    tensor_data = tf.sparse.from_dense(tensor_data)
+    return tensor_data
+    # with open(filename, 'w') as f:
+    #     pprint.pprint(data, stream=f, width=10000)
+        # json.dump(data, f, indent=2)
+        
+# convert_to_txt('data/imdb/feature_matrix.pkl', 'data/imdb/feature.txt')
+# convert_to_txt('data/imdb/spatial_matrix.pkl', 'data/imdb/spatial.txt')

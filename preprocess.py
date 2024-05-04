@@ -42,8 +42,10 @@ def prepreprocess(path):
     inputs = tokenizer.texts_to_sequences(inputs)
     inputs = pad_sequences(inputs, maxlen=100, padding="post", value=0)
 
+
     print('First sample after preprocessing: \n', inputs[0].shape, '\n')
     # print(inputs.shape)
+
     return inputs, labels
     
 # prepreprocess('data/movie_review.parquet')
@@ -127,4 +129,4 @@ def merge(path1, path2, target_path):
         print(e)
 
 # merge('train-00000-of-00001.parquet','test-00000-of-00001.parquet', 'movie_review.parquet')
-# preprocess('data/movie_review.parquet')
+preprocess('data/movie_review.parquet')
