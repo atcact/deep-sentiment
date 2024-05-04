@@ -1,9 +1,6 @@
 import pyarrow.parquet as pq
 import tensorflow as tf
 import numpy as np
-from keras.preprocessing import sequence
-from keras.models import Sequential
-from keras.layers import Dense, Embedding, GlobalMaxPooling1D, Flatten, Conv1D, Dropout, Activation
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
 
@@ -39,28 +36,8 @@ def shuffle(inputs, labels):
     return inputs, labels
 
 
-def train_test_split(X, y, test_size=0.2):
+def train_test_split(X, test_size=0.2):
     train_size = int(len(X) * (1 - test_size))
     X_train, X_test = X[:train_size], X[train_size:]
-    y_train, y_test = y[:train_size], y[train_size:]
-    return X_train, X_test, y_train, y_test
-
-def merge(path1, path2, target_path):
-    try:
-        file1 = pq.read_table(path1)
-        file2 = pq.read_table(path2)
-        
-        with pq.ParquetWriter(target_path,
-                file1.schema,
-                version='2.0',
-                compression='gzip',
-                use_dictionary=True,
-                data_page_size=2097152, #2MB
-                write_statistics=True) as writer:
-            writer.write_table(file1)
-            writer.write_table(file2)
-    except Exception as e:
-        print(e)
-
-# merge('train-00000-of-00001.parquet','test-00000-of-00001.parquet', 'movie_review.parquet')
-preprocess('data/movie_review.parquet')
+    
+    return X_train, X_test

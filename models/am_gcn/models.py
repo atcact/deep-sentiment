@@ -1,5 +1,5 @@
 import tensorflow as tf
-from .layers import GraphConvolution
+from layers import GraphConvolution
 
 class GCN(tf.keras.Model):
     def __init__(self, nfeat, nhid, out, dropout):
@@ -10,7 +10,7 @@ class GCN(tf.keras.Model):
      
     def call(self, x, adj, training=False):
         x = tf.nn.relu(self.gc1(x, adj))
-        x = tf.nn.dropout(x, self.dropout, training=training)
+        x = tf.nn.dropout(x, self.dropout)
         x = self.gc2(x, adj)
         return x
     
@@ -47,7 +47,8 @@ class AMGCN(tf.keras.Model):
             tf.keras.layers.Activation('softmax')
         ])
 
-    def call(self, x, sadj, fadj, training=False):
+    def call(self, input, training=False):
+        x, sadj, fadj = input
         emb1 = self.SGCN1(x, sadj, training=training) 
         com1 = self.CGCN(x, sadj, training=training) 
         com2 = self.CGCN(x, fadj, training=training) 
