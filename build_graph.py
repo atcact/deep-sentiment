@@ -39,8 +39,12 @@ def feature_graph(path):
     '''builds a feature graph given a dataset'''
     tokenized_inputs, inputs, _ = preprocess(path)  
     tokenized_inputs = tokenized_inputs.numpy().tolist()
-    word2vec = gensim.models.Word2Vec(tokenized_inputs, vector_size=100,window=20,max_vocab_size=VOCAB_SIZE,min_count=1)
-    print(word2vec.wv)
+    word2vec = gensim.models.Word2Vec(tokenized_inputs, vector_size=100,window=20,
+                                      max_vocab_size=VOCAB_SIZE,min_count=1)
+    word_vectors = np.asarray(word2vec.wv.vectors)
+    with open('word_vectors.pkl', 'wb') as f:
+        pickle.dump(word2vec.wv.vectors, f)
+
     feature_matrix = cosine_similarity(word2vec.wv.vectors)
     print(feature_matrix.shape)
     for i in range(min(feature_matrix.shape)):
@@ -51,6 +55,31 @@ def feature_graph(path):
         pickle.dump(feature_matrix, f)
     return feature_matrix
 
-feature_graph('data/movie_review.parquet')
+# feature_graph('data/movie_review.parquet')
 # build_graph('data/movie_review.parquet', 20)
 
+def knn_graph(path, nearest_num):
+    with open(path, 'rb') as f:
+        cosine_similarity = pickle.load(f)
+    knn_graph = []
+    i=0
+    for row in cosine_similarity:
+        i+=1
+        print('progress',i,"/",len(cosine_similarity))
+        tuples = [(row[i],i) for i in range(len(row))]
+
+        sorted_list = sorted(tuples, key = lambda x: x[0])
+        kth_largest= sorted_list[len(sorted_list)-nearest_num-1][0]
+        count = 0
+        for tuple in sorted_list:
+            if tuple[0] >kth_largest and count <nearest_num:
+                knn_graph.append([i,tuple[1]])
+                count +=1
+    print(knn_graph)
+    with open('knn_graph'+str(nearest_num)+'.txt','w') as f:
+        for row in knn_graph:
+            f.write(str(row[0]) +' ' + str(row[1])+ '\n')
+
+knn_graph('feature_matrix.pkl',5)
+            
+        
