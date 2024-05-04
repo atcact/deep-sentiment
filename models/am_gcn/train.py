@@ -1,27 +1,23 @@
 import tensorflow as tf
-# from tensorflow.keras.models import Model
-# from tensorflow.keras.layers import Input, Dense
-# from tensorflow.keras.optimizers import Adam
-# from tensorflow.keras.losses import SparseCategoricalCrossentropy
 from sklearn.metrics import f1_score
 import numpy as np
 import os
 from pathlib import Path
 import argparse
 from models import AMGCN
-from utils import *
+from gcn_utils import *
 from config import Config
 
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     parse = argparse.ArgumentParser()
-    # parse.add_argument("-d", "--dataset", help="dataset", type=str, required=True)
+    parse.add_argument("-d", "--dataset", help="dataset", type=str, required=True)
     parse.add_argument("-l", "--labelrate", help="labeled data for train per class", type = int, required = True)
     args = parse.parse_args()
     
     path = Path(__file__)
     ROOT_DIR = path.parent.absolute()
-    config_file = "./config/" + str(args.labelrate) + ".ini"
+    config_file = "./config/" + args.dataset + "_" + str(args.labelrate) + ".ini"
     config_path = os.path.join(ROOT_DIR, config_file)
     config = Config(config_path)
 
@@ -30,16 +26,7 @@ if __name__ == "__main__":
     sadj, fadj = load_graph(args.labelrate, config)
     # sadj, fadj = load_graph_to_tensor("./data/imdb/spatial_matrix.pkl"), load_graph_to_tensor("./data/imdb/feature_matrix.pkl")
     features, labels, idx_train, idx_test = load_data(config)
-    # features, labels, idx_train, idx_test = my_load_data()
 
-    # inputs = tf.keras.layers.Input(shape=(config.n, config.fdim))
-    # amgcn_model = AMGCN(config.fdim, config.class_num, config.nhid1, config.nhid2, config.class_num, config.dropout)
-    # inputs = tf.reshape(inputs, (config.n, config.fdim))
-    # print("inputs shape: ", inputs.shape)
-    # output, att, emb1, com1, com2, emb2, emb = amgcn_model(inputs, sadj, fadj)
-    # # x = tf.keras.layers.Dense(config.class_num, activation='softmax')(output)
-    # # model = tf.keras.models.Model(inputs=inputs, outputs=x)
-    # model = amgcn_model
     model = AMGCN(config.fdim, config.class_num, config.nhid1, config.nhid2, config.class_num, config.dropout)
     optimizer = tf.keras.optimizers.Adam(learning_rate=config.lr, weight_decay=config.weight_decay)
     loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
@@ -50,7 +37,6 @@ if __name__ == "__main__":
         acc_test = 0
         macro_f1 = 0
         emb_test = 0
-        # model.fit((features, sadj, fadj), labels, epochs=epochs)
         for epoch in range(epochs):
             with tf.GradientTape() as tape:
                 output, att, emb1, com1, com2, emb2, emb = model((features, sadj, fadj), training=True)
@@ -70,12 +56,8 @@ if __name__ == "__main__":
         return loss, acc_test, macro_f1, emb_test
 
     def main_test(model):
-        # model.evaluate()
         output, att, emb1, com1, com2, emb2, emb = model((features, sadj, fadj))
-        # print("output: ", output)
-        # print("output shape: ", tf.gather(output, idx_test).shape, tf.gather(labels, idx_test).shape)
         acc_test = accuracy(tf.gather(output, idx_test), tf.gather(labels, idx_test))
-        # acc_test = accuracy(output[idx_test], labels[idx_test])
         label_max = []
         for idx in idx_test:
             label_max.append(tf.argmax(output[idx]).numpy())
