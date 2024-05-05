@@ -25,14 +25,13 @@ def main(args):
     # Preprocess the data
     inputs, labels = preprocess('data/sts_gold_tweet.parquet')
     train_inputs, test_inputs, train_labels, test_labels = train_test_split(inputs, labels, test_size=0.2)
-    
     # Define and compile the model
     if args.model == "rnn":
-        model = RNN()
+        model = RNN(input_length=10)
     elif args.model == "amgcn":
         model = AMGCN(nfeat=300, nclass=2, nhid1=256, nhid2=128, n=2, dropout=0.5)
     elif args.model == "mccnn":
-        model = MC_CNN(length=100, vocab_size=20000)
+        model = MC_CNN(length=10, vocab_size=20000)
     else:
         raise ValueError("Invalid model name")
     

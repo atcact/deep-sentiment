@@ -2,11 +2,11 @@ import pyarrow.parquet as pq
 import tensorflow as tf
 import numpy as np
 from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
+from keras.utils import pad_sequences
 import re
 
 VOCAB_SIZE = 20000
-MAX_LEN = 100
+MAX_LEN = 10
 def preprocess_text(text):
     # Lowercasing
     text = text.lower()
@@ -56,7 +56,7 @@ def preprocess(path):
     
     data = dataset.read().to_pandas()
     inputs = data["tweet"]
-    labels = data["polarity"]
+    labels = data["polarity"] // 4
 
     # Apply text cleaning
     inputs = inputs.apply(preprocess_text)
