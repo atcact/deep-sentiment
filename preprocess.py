@@ -64,3 +64,6 @@ def merge(path1, path2, target_path):
 
 # merge('train-00000-of-00001.parquet','test-00000-of-00001.parquet', 'movie_review.parquet')
 # preprocess('data/movie_review.parquet')
+        
+
+

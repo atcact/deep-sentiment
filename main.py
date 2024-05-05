@@ -5,7 +5,11 @@ import os
 import random
 import tensorflow as tf
 
+import pandas as pd
+
+
 from preprocess import preprocess, train_test_split, shuffle
+from preprocess1 import preprocess
 from models.rnn.models import RNN
 from models.am_gcn.models import AMGCN
 from models.mc_cnn.models import MC_CNN
@@ -22,6 +26,13 @@ def parseArguments():
 
 def main(args):
     inputs, labels = preprocess('data/movie_review.parquet')
+    
+    #df = pd.read_csv("data/sts_gold_tweet.csv")
+    #df.to_parquet("data/sts_gold_tweet.parquet")
+
+    #inputs, labels = preprocess('data/sts_gold_tweet.parquet')
+
+    
     train_inputs, test_inputs, train_labels, test_labels = train_test_split(inputs, labels, test_size=0.2)
     if args.model == "rnn":
         model = RNN()
