@@ -133,4 +133,5 @@ dmypy.json
 
 #dataset
 data/acm/
-data/imdb
+data/imdb/
+data/citeseer/

@@ -37,22 +37,21 @@ if __name__ == "__main__":
         acc_test = 0
         macro_f1 = 0
         emb_test = 0
-        for epoch in range(epochs):
-            with tf.GradientTape() as tape:
-                output, att, emb1, com1, com2, emb2, emb = model((features, sadj, fadj), training=True)
-                loss_class = loss_fn(tf.gather(labels, idx_train), tf.gather(output, idx_train)) 
+        with tf.GradientTape() as tape:
+            output, att, emb1, com1, com2, emb2, emb = model((features, sadj, fadj), training=True)
+            loss_class = loss_fn(tf.gather(labels, idx_train), tf.gather(output, idx_train)) 
 
-                loss_dep = (loss_dependence(emb1, com1, config.n) + loss_dependence(emb2, com2, config.n))/2
-                loss_com = common_loss(com1,com2)
-                loss = loss_class + config.beta * loss_dep + config.theta * loss_com
-            gradients = tape.gradient(loss, model.trainable_variables)
-            optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-            acc_test, macro_f1, emb_test = main_test(model)
-            print('e:{}'.format(epoch),
-                'ltr: {:.4f}'.format(loss),
-                'atr: {:.4f}'.format(acc_test),
-                'ate: {:.4f}'.format(acc_test),
-                'f1te:{:.4f}'.format(macro_f1))
+            loss_dep = (loss_dependence(emb1, com1, config.n) + loss_dependence(emb2, com2, config.n))/2
+            loss_com = common_loss(com1,com2)
+            loss = loss_class + config.beta * loss_dep + config.theta * loss_com
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+        acc_test, macro_f1, emb_test = main_test(model)
+        print('e:{}'.format(epoch),
+            'ltr: {:.4f}'.format(loss),
+            'atr: {:.4f}'.format(acc_test),
+            'ate: {:.4f}'.format(acc_test),
+            'f1te:{:.4f}'.format(macro_f1))
         return loss, acc_test, macro_f1, emb_test
 
     def main_test(model):
