@@ -123,6 +123,8 @@ def load_graph(dataset, config):
     print('finish loading graph', nfadj.shape, nsadj.shape)
     nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
     nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
+    print('finish converting to sparse tensor', nfadj.shape, nsadj.shape)
+    print(nfadj, nsadj)
     return nsadj, nfadj
 
 # def load_graph_to_tensor(path):
@@ -158,9 +160,12 @@ def load_graph_to_tensor(config):
     # sadj = sp.coo_matrix((np.ones(sedges.shape[0]), (sedges[:, 0], sedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
     # sadj = sadj + sadj.T.multiply(sadj.T > sadj) - sadj.multiply(sadj.T > sadj)
     # nsadj = normalize(sadj + sp.eye(sadj.shape[0]))
-    print('finish loading graph', nfadj.shape, nsadj.shape)
+    # print('finish loading graph', nfadj.shape, nsadj.shape)
     nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
     nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
+    # print("load graph to tensor", nsadj.shape, nfadj.shape)
+    # print(nsadj)
+    # print(nfadj)
     return nsadj, nfadj
         
 # convert_to_txt('data/imdb/feature_matrix.pkl', 'data/imdb/feature.txt')
