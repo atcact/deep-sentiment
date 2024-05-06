@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
 # vscode
 .vscode/
 
@@ -132,4 +133,5 @@ dmypy.json
 
 #dataset
 data/acm/
-data/imdb
+data/imdb/
+data/citeseer/

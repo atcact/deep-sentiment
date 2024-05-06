@@ -102,10 +102,11 @@ def load_data(config):
 
 def my_load_data():
     features, labels = preprocess("data/movie_review.parquet")
-    idx_train, idx_test = train_test_split(np.arange(20000), test_size=0.2)
+    idx_train, idx_test = train_test_split(np.arange(15000), test_size=0.2)
     
 
     return features, labels, idx_train, idx_test
+
 def load_graph(dataset, config):
     featuregraph_path = config.featuregraph_path + str(config.k) + '.txt'
 
@@ -118,22 +119,54 @@ def load_graph(dataset, config):
     sedges = np.array(list(struct_edges), dtype=np.int32).reshape(struct_edges.shape)
     sadj = sp.coo_matrix((np.ones(sedges.shape[0]), (sedges[:, 0], sedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
     sadj = sadj + sadj.T.multiply(sadj.T > sadj) - sadj.multiply(sadj.T > sadj)
-    nsadj = normalize(sadj+sp.eye(sadj.shape[0]))
+    nsadj = normalize(sadj + sp.eye(sadj.shape[0]))
     print('finish loading graph', nfadj.shape, nsadj.shape)
     nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
     nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
+    print('finish converting to sparse tensor', nfadj.shape, nsadj.shape)
+    print(nfadj, nsadj)
     return nsadj, nfadj
 
-def load_graph_to_tensor(path):
-    # data = pickle.load(open(path, 'rb'))
-    with open(path, 'rb') as f:
-        data = pickle.load(f)
-    tensor_data = tf.convert_to_tensor(data, dtype=tf.float32)
-    tensor_data = tf.sparse.from_dense(tensor_data)
-    return tensor_data
+# def load_graph_to_tensor(path):
+#     data = pickle.load(open(path, 'rb'))
+#     with open(path, 'rb') as f:
+#         data = pickle.load(f)
+#     tensor_data = tf.convert_to_tensor(data, dtype=tf.float32)
+#     tensor_data = tf.sparse.from_dense(tensor_data)
+#     return tensor_data
     # with open(filename, 'w') as f:
     #     pprint.pprint(data, stream=f, width=10000)
         # json.dump(data, f, indent=2)
+
+def load_graph_to_tensor(config):
+    featuregraph_path = config.featuregraph_path + str(config.k) + '.txt'
+        
+    feature_edges = np.genfromtxt(featuregraph_path, dtype=np.int32)
+    fedges = np.array(list(feature_edges), dtype=np.int32).reshape(feature_edges.shape)
+    fedges = fedges - 1
+    fadj = sp.coo_matrix((np.ones(fedges.shape[0]), (fedges[:, 0], fedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
+    fadj = fadj + fadj.T.multiply(fadj.T > fadj) - fadj.multiply(fadj.T > fadj)
+    nfadj = normalize(fadj + sp.eye(fadj.shape[0]))
+    
+    sadj = pickle.load(open(config.structgraph_path, 'rb'))
+    sadj = sp.csr_matrix(sadj, dtype=np.float32)
+    # sadj = tf.convert_to_tensor(sadj, dtype=tf.float32)
+    # sadj = tf.sparse.from_dense(sadj)
+    # nsadj = normalize(sadj)
+    nsadj = sadj
+    
+    # struct_edges = np.genfromtxt(config.structgraph_path, dtype=np.int32)
+    # sedges = np.array(list(struct_edges), dtype=np.int32).reshape(struct_edges.shape)
+    # sadj = sp.coo_matrix((np.ones(sedges.shape[0]), (sedges[:, 0], sedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
+    # sadj = sadj + sadj.T.multiply(sadj.T > sadj) - sadj.multiply(sadj.T > sadj)
+    # nsadj = normalize(sadj + sp.eye(sadj.shape[0]))
+    # print('finish loading graph', nfadj.shape, nsadj.shape)
+    nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
+    nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
+    # print("load graph to tensor", nsadj.shape, nfadj.shape)
+    # print(nsadj)
+    # print(nfadj)
+    return nsadj, nfadj
         
 # convert_to_txt('data/imdb/feature_matrix.pkl', 'data/imdb/feature.txt')
 # convert_to_txt('data/imdb/spatial_matrix.pkl', 'data/imdb/spatial.txt')

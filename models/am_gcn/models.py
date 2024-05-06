@@ -58,5 +58,5 @@ class AMGCN(tf.keras.Model):
         emb, att = self.attention(emb)
         output = self.MLP(emb)
         return output, att, emb1, com1, com2, emb2, emb
-
-
+    
+    
