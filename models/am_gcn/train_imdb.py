@@ -33,7 +33,10 @@ if __name__ == "__main__":
     # features, labels, idx_train, idx_test = load_data(config)
     features, labels = preprocess("data/movie_review.parquet")
     features = tf.cast(features, dtype=tf.float32)
-    idx_train, idx_test = train_test_split(np.arange(15000), test_size=0.2)    
+    idx_train, idx_test = train_test_split(np.arange(15000), test_size=0.2)  
+    labels = np.reshape(labels, (-1, 1))
+    features_train, labels_train = tf.gather(features, idx_train), tf.gather(labels, idx_train)
+    features_test, labels_test = tf.gather(features, idx_test), tf.gather(labels, idx_test)
 
     amgcn_model = AMGCN(config.fdim, config.class_num, config.nhid1, config.nhid2, config.class_num, config.dropout)
     empty_input = tf.zeros((config.n, config.fdim))
@@ -42,17 +45,25 @@ if __name__ == "__main__":
     inputs1 = tf.keras.Input(shape=(100,))
     inputs2 = tf.keras.Input(shape=(config.fdim,))
     output, att, emb1, com1, com2, emb2, emb = amgcn_model((inputs2, sadj, fadj))
+    dense_lay = tf.keras.layers.Dense(config.fdim)
+    emb = dense_lay(emb)
+    emb = tf.reshape(emb, (emb.shape[1], emb.shape[0]))
+    input_emb = tf.matmul(inputs1, emb)
+    # input_emb = tf.reshape(input_emb, (input_emb.shape[0], 1, input_emb.shape[1]))
+    # inputs1 = tf.reshape(inputs1, (inputs1.shape[0], 1, inputs1.shape[1]))
     classifier = tf.keras.Sequential([
-                            tf.keras.layers.Embedding(input_dim=emb.shape[0], output_dim=emb.shape[1], input_length=100, weights=[emb], trainable=True),
-                            tf.keras.layers.GlobalAveragePooling1D(),
+                            # tf.keras.layers.Embedding(input_dim=emb.shape[0], output_dim=emb.shape[1], input_length=100, weights=[emb], trainable=True),
+                            # tf.keras.layers.GlobalAveragePooling1D(),
+                            # tf.keras.layers.LSTM(128),
                             tf.keras.layers.Dense(1, activation='sigmoid')
                         ])
-    final_out = classifier(inputs1)
+    final_out = classifier(input_emb)
+    # final_out = tf.reshape(final_out, (final_out.shape[1],))
     model = tf.keras.Model(inputs=[inputs1, inputs2], outputs=final_out)
     
     optimizer = tf.keras.optimizers.Adam(learning_rate=config.lr, weight_decay=config.weight_decay)
     loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'], run_eagerly=False)
+    model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
 
     def train(model, epochs):
         loss = 0
