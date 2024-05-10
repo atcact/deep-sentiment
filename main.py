@@ -7,8 +7,8 @@ import tensorflow as tf
 
 import pandas as pd
 
+from preprocess import *
 
-from preprocess import preprocess, train_test_split, shuffle
 from models.rnn.models import RNN
 from models.am_gcn.models import AMGCN
 from models.mc_cnn.models import MC_CNN
@@ -24,7 +24,14 @@ def parseArguments():
     args = parser.parse_args()
     return args
 
-
+def set_seed(seed=0):
+    """
+    Set the random seed for reproducibility.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+    
 def main(args):
     input_length = 100
     if args.dataset == "imdb":
@@ -58,4 +65,5 @@ def main(args):
     
 if __name__ == "__main__":
     args = parseArguments()
+    set_seed(1)
     main(args)
