@@ -5,9 +5,9 @@ Sentiment classification plays a crucial role in various applications such as so
 
 ## Usage
 
-Install packages
+Clone the repo and install packages
 
-'''bash
+'''
 git clone 
 cd deep-sentiment
 pip install -r requirements.txt
@@ -15,13 +15,13 @@ pip install -r requirements.txt
 
 To run RNN and MC-CNN models:
 
-'''bash
-python main.py --model [rnn/mccnn]
+'''
+python main.py --model [rnn/mccnn] --dataset [imdb/sts_gold]
 '''
 
 To run GCN/AMGCN models:
 
-'''bash
+'''
 
 '''
 
