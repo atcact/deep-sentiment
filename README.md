@@ -27,10 +27,6 @@ To run GCN/AMGCN models:
 python models/am_gcn/main.py --model [gcn/amgcn] --dataset [acm/citeseer]
 ```
 
-```bash
-cd models/amgcn
-python train.py 
-```
 
 ## Dataset
 
