@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # features, labels, idx_train, idx_test = load_data(config)
     features, labels = preprocess("data/movie_review.parquet")
     features = tf.cast(features, dtype=tf.float32)
-    idx_train, idx_test = train_test_split(np.arange(15000), test_size=0.2)  
+    idx_train, idx_test = train_test_split(np.arange(50000), test_size=0.2)  
     labels = np.reshape(labels, (-1, 1))
     features_train, labels_train = tf.gather(features, idx_train), tf.gather(labels, idx_train)
     features_test, labels_test = tf.gather(features, idx_test), tf.gather(labels, idx_test)
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     dense_lay = tf.keras.layers.Dense(config.fdim)
     emb = dense_lay(emb)
     emb = tf.reshape(emb, (emb.shape[1], emb.shape[0]))
+    # emb = tf.keras.layers.Reshape((emb.shape[1], emb.shape[0]), ba)(emb)
     input_emb = tf.matmul(inputs1, emb)
     # input_emb = tf.reshape(input_emb, (input_emb.shape[0], 1, input_emb.shape[1]))
     # inputs1 = tf.reshape(inputs1, (inputs1.shape[0], 1, inputs1.shape[1]))
@@ -62,7 +63,7 @@ if __name__ == "__main__":
     model = tf.keras.Model(inputs=[inputs1, inputs2], outputs=final_out)
     
     optimizer = tf.keras.optimizers.Adam(learning_rate=config.lr, weight_decay=config.weight_decay)
-    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+    loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=False)
     model.compile(optimizer=optimizer, loss=loss_fn, metrics=['accuracy'])
 
     def train(model, epochs):
