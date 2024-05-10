@@ -3,8 +3,6 @@ import scipy.sparse as sp
 import tensorflow as tf
 import networkx as nx
 import pickle
-import pprint
-import json
 from preprocess import preprocess, train_test_split
 
 def common_loss(emb1, emb2):
@@ -127,16 +125,6 @@ def load_graph(dataset, config):
     print(nfadj, nsadj)
     return nsadj, nfadj
 
-# def load_graph_to_tensor(path):
-#     data = pickle.load(open(path, 'rb'))
-#     with open(path, 'rb') as f:
-#         data = pickle.load(f)
-#     tensor_data = tf.convert_to_tensor(data, dtype=tf.float32)
-#     tensor_data = tf.sparse.from_dense(tensor_data)
-#     return tensor_data
-    # with open(filename, 'w') as f:
-    #     pprint.pprint(data, stream=f, width=10000)
-        # json.dump(data, f, indent=2)
 
 def load_graph_to_tensor(config):
     featuregraph_path = config.featuregraph_path + str(config.k) + '.txt'
@@ -150,23 +138,10 @@ def load_graph_to_tensor(config):
     
     sadj = pickle.load(open(config.structgraph_path, 'rb'))
     sadj = sp.csr_matrix(sadj, dtype=np.float32)
-    # sadj = tf.convert_to_tensor(sadj, dtype=tf.float32)
-    # sadj = tf.sparse.from_dense(sadj)
-    # nsadj = normalize(sadj)
     nsadj = sadj
-    
-    # struct_edges = np.genfromtxt(config.structgraph_path, dtype=np.int32)
-    # sedges = np.array(list(struct_edges), dtype=np.int32).reshape(struct_edges.shape)
-    # sadj = sp.coo_matrix((np.ones(sedges.shape[0]), (sedges[:, 0], sedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
-    # sadj = sadj + sadj.T.multiply(sadj.T > sadj) - sadj.multiply(sadj.T > sadj)
-    # nsadj = normalize(sadj + sp.eye(sadj.shape[0]))
-    # print('finish loading graph', nfadj.shape, nsadj.shape)
+
     nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
     nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
-    # print("load graph to tensor", nsadj.shape, nfadj.shape)
-    # print(nsadj)
-    # print(nfadj)
+
     return nsadj, nfadj
         
-# convert_to_txt('data/imdb/feature_matrix.pkl', 'data/imdb/feature.txt')
-# convert_to_txt('data/imdb/spatial_matrix.pkl', 'data/imdb/spatial.txt')

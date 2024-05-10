@@ -10,16 +10,17 @@ from gcn_utils import *
 from config import Config
 from preprocess import preprocess, train_test_split
 
+'''
+Train AMGCN on IMDB dataset
+'''
+
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     parse = argparse.ArgumentParser()
-    # parse.add_argument("-d", "--dataset", help="dataset", type=str, required=True)
-    # parse.add_argument("-l", "--labelrate", help="labeled data for train per class", type = int, required = True)
     args = parse.parse_args()
     
     path = Path(__file__)
     ROOT_DIR = path.parent.absolute()
-    # config_file = "./config/" + args.dataset + "_" + str(args.labelrate) + ".ini"
     config_file = "./config/imdb_20.ini"
     config_path = os.path.join(ROOT_DIR, config_file)
     config = Config(config_path)
