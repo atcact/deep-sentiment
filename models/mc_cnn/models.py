@@ -3,7 +3,7 @@ import numpy as np
 from keras.models import Model
 
 def MC_CNN(length, vocab_size, dropout_rate=0.5):
-    # channel 1
+        # channel 1
         inputs1 = tf.keras.layers.Input(shape=(length,))
         embedding1 = tf.keras.layers.Embedding(vocab_size, 100)(inputs1)
         conv1 = tf.keras.layers.Conv1D(filters=16, kernel_size=4, activation='relu')(embedding1)

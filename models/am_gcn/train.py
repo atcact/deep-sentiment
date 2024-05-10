@@ -54,26 +54,28 @@ if __name__ == "__main__":
                 loss_dep = (loss_dependence(emb1, com1, config.n) + loss_dependence(emb2, com2, config.n))/2
                 loss_com = common_loss(com1,com2)
                 loss = loss_class + config.beta * loss_dep + config.theta * loss_com
+            
+            acc = accuracy(tf.gather(output, idx_train), tf.gather(labels, idx_train))
                 
-        gradients = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(
-            (grad, var) 
-            for (grad, var) in zip(gradients, model.trainable_variables) 
-            if grad is not None
-        )
+            gradients = tape.gradient(loss, model.trainable_variables)
+            optimizer.apply_gradients(
+                (grad, var) 
+                for (grad, var) in zip(gradients, model.trainable_variables) 
+                if grad is not None
+            )
         acc_test, macro_f1 = main_test(model)
         print('e:{}'.format(epoch),
             'ltr: {:.4f}'.format(loss),
-            'atr: {:.4f}'.format(acc_test),
+            'atr: {:.4f}'.format(acc),
             'ate: {:.4f}'.format(acc_test),
             'f1te:{:.4f}'.format(macro_f1))
         return loss, acc_test, macro_f1
 
     def main_test(model):
         if args.model == "gcn":
-            output = model((features, sadj))
+            output = model((features, sadj), training=False)
         elif args.model == "amgcn":
-            output, att, emb1, com1, com2, emb2, emb = model((features, sadj, fadj))
+            output, att, emb1, com1, com2, emb2, emb = model((features, sadj, fadj), training=False)
             
         acc_test = accuracy(tf.gather(output, idx_test), tf.gather(labels, idx_test))
         label_max = []
