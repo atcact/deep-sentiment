@@ -5,7 +5,10 @@ import os
 import random
 import tensorflow as tf
 
+import pandas as pd
+
 from preprocess import *
+
 from models.rnn.models import RNN
 from models.am_gcn.models import AMGCN
 from models.mc_cnn.models import MC_CNN
@@ -15,7 +18,9 @@ def parseArguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", type=str, default="rnn")
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--epochs", type=int, default=3)
+    parser.add_argument("--dataset", type=str, default="imdb")
+    parser.add_argument("--dropout", type=float, default=0.5)
     args = parser.parse_args()
     return args
 
@@ -28,16 +33,20 @@ def set_seed(seed=0):
     tf.random.set_seed(seed)
     
 def main(args):
-    set_seed()
-    inputs, labels = prepreprocess('data/movie_review.parquet')
+    input_length = 100
+    if args.dataset == "imdb":
+        inputs, labels = preprocess('data/movie_review.parquet', input_length=input_length)
+    elif args.dataset == "sts_gold":
+        input_length = 10
+        inputs, labels = preprocess('data/sts_gold_tweet.parquet', input_length=input_length, process_text=True) 
+    
     train_inputs, test_inputs, train_labels, test_labels = train_test_split(inputs, labels, test_size=0.2)
     if args.model == "rnn":
-        model = RNN()
+        model = RNN(input_length=input_length)
     elif args.model == "amgcn":
-        model = AMGCN(nfeat=300, nclass=2, nhid1=256, nhid2=128, n=2, dropout=0.5)
-    # TODO: Add more models
+        model = AMGCN(nfeat=300, nclass=2, nhid1=256, nhid2=128, n=2, dropout=args.dropout)
     elif args.model == "mccnn":
-        model = MC_CNN(length=100, vocab_size=20000)
+        model = MC_CNN(length=input_length, vocab_size=20000, dropout_rate=args.dropout)
     else:
         raise ValueError("Invalid model name")
     
@@ -56,4 +65,5 @@ def main(args):
     
 if __name__ == "__main__":
     args = parseArguments()
+    set_seed(0)
     main(args)

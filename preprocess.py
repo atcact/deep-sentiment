@@ -4,6 +4,7 @@ import numpy as np
 from keras.preprocessing import sequence
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
+import re
 import nltk
 from nltk.corpus import stopwords
 from utils import loadWord2Vec, clean_str
@@ -13,43 +14,70 @@ from nltk.tokenize import word_tokenize
 VOCAB_SIZE = 20000
 MAX_LEN = 50
 
-def prepreprocess(path):
+def preprocess_text(text):
+    # Lowercasing
+    text = text.lower()
+    
+    # Removing special characters and digits
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    
+    # Tokenization
+    tokens = text.split()
+    
+    # Removing stopwords (you can define your own list of stopwords)
+    stopwords = {'is', 'the', 'and', 'that', 'this', 'to', 'of', 'a', 'an', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'it', 'as', 'has', 'have', 'was', 'were', 'be', 'been'}
+    tokens = [word for word in tokens if word not in stopwords]
+    
+    # Join tokens back into string
+    cleaned_text = ' '.join(tokens)
+    
+    return cleaned_text
+
+def preprocess(path, input_length=MAX_LEN, process_text=False):
+    """takes in the dataset and returns the train_input, train_labels, test_input, test_labels in this order"""
     dataset = pq.ParquetDataset(path)
     
     data = dataset.read().to_pandas()
     inputs = data.iloc[:,0]
     labels = data.iloc[:,1]
+    
+    if labels.max() > 1:
+        labels = labels // labels.max()
+    if process_text:
+        inputs = inputs.apply(preprocess_text)
 
     # print("inputs: ", inputs)
     # print("labels: ", labels)
     # print('First sample before preprocessing: \n', inputs[0], '\n')
 
-    stop_words = set(stopwords.words('english'))
-    # Remove stopwords and punctuation
-    stop_words = set(stopwords.words('english'))
-    punctuation = set(string.punctuation)
+    # stop_words = set(stopwords.words('english'))
+    # # Remove stopwords and punctuation
+    # stop_words = set(stopwords.words('english'))
+    # punctuation = set(string.punctuation)
 
-    def clean_text(text):
-        tokens = word_tokenize(text.lower())
-        tokens = [t for t in tokens if t not in stop_words and t not in punctuation]
-        return ' '.join(tokens)
+    # def clean_text(text):
+    #     tokens = word_tokenize(text.lower())
+    #     tokens = [t for t in tokens if t not in stop_words and t not in punctuation]
+    #     return ' '.join(tokens)
 
-    inputs = inputs.apply(clean_text)
+    # inputs = inputs.apply(clean_text)
 
     tokenizer = Tokenizer(num_words=VOCAB_SIZE)
     tokenizer.fit_on_texts(inputs)
     
     inputs = tokenizer.texts_to_sequences(inputs)
-    inputs = pad_sequences(inputs, maxlen=100, padding="post", value=0)
+    inputs = pad_sequences(inputs, maxlen=input_length, padding="post", value=0)
 
 
-    print('First sample after preprocessing: \n', inputs[0].shape, '\n')
+    # print('First sample after preprocessing: \n', inputs[0].shape, '\n')
     # print(inputs.shape)
 
     return inputs, labels
-    
-# prepreprocess('data/movie_review.parquet')
-def preprocess(path):
+
+#preprocess('data/sts_gold_tweet.parquet', process_text=True)    
+#preprocess('data/movie_review.parquet')
+
+def preprocess_gcn(path):
     """takes in the dataset and returns the tokenized inputs, inputs, and labels as tensors"""
     dataset = pq.ParquetDataset(path)
     
@@ -129,4 +157,6 @@ def merge(path1, path2, target_path):
         print(e)
 
 # merge('train-00000-of-00001.parquet','test-00000-of-00001.parquet', 'movie_review.parquet')
-preprocess('data/movie_review.parquet')
+# preprocess('data/movie_review.parquet')
+        
+

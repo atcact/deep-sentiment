@@ -1,5 +1,5 @@
 import tensorflow as tf
-from layers import GraphConvolution
+from .layers import GraphConvolution
 
 '''
 GCN and AMGCN models
