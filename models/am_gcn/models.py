@@ -1,6 +1,9 @@
 import tensorflow as tf
-from layers import GraphConvolution
+from .layers import GraphConvolution
 
+'''
+GCN and AMGCN models
+'''
 class GCN(tf.keras.Model):
     def __init__(self, nfeat, nhid, out, dropout):
         super(GCN, self).__init__()
