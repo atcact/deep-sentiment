@@ -37,7 +37,7 @@ def sparse_mx_to_tf_sparse_tensor(sparse_mx):
     indices = tf.transpose(indices)
     values = tf.convert_to_tensor(sparse_mx.data, dtype=tf.float32)
     shape = sparse_mx.shape
-    print(indices.shape, values.shape, shape)
+    # print(indices.shape, values.shape, shape)
     return tf.SparseTensor(indices, values, shape)
 
 def parse_index_file(filename):
@@ -118,11 +118,11 @@ def load_graph(dataset, config):
     sadj = sp.coo_matrix((np.ones(sedges.shape[0]), (sedges[:, 0], sedges[:, 1])), shape=(config.n, config.n), dtype=np.float32)
     sadj = sadj + sadj.T.multiply(sadj.T > sadj) - sadj.multiply(sadj.T > sadj)
     nsadj = normalize(sadj + sp.eye(sadj.shape[0]))
-    print('finish loading graph', nfadj.shape, nsadj.shape)
+    # print('finish loading graph', nfadj.shape, nsadj.shape)
     nsadj = sparse_mx_to_tf_sparse_tensor(nsadj)
     nfadj = sparse_mx_to_tf_sparse_tensor(nfadj)
-    print('finish converting to sparse tensor', nfadj.shape, nsadj.shape)
-    print(nfadj, nsadj)
+    # print('finish converting to sparse tensor', nfadj.shape, nsadj.shape)
+    # print(nfadj, nsadj)
     return nsadj, nfadj
 
 
