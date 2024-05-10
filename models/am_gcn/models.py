@@ -18,12 +18,12 @@ class GCN(tf.keras.Model):
         return x
     
 class Attention(tf.keras.Model):
-    def __init__(self, in_size, hidden_size=16):
+    def __init__(self, hidden_size=16):
         super(Attention, self).__init__()
 
         self.project = tf.keras.Sequential([
             tf.keras.layers.Dense(hidden_size, activation='tanh'),
-            tf.keras.layers.Dense(1, bias_initializer=tf.constant_initializer(0))
+            tf.keras.layers.Dense(1, use_bias=False),
         ])
 
     def call(self, z):
@@ -41,9 +41,10 @@ class AMGCN(tf.keras.Model):
         self.CGCN = GCN(nfeat, nhid1, nhid2, dropout) # Common GCN
 
         self.dropout = dropout
-        self.a = tf.Variable(tf.zeros((nhid2, 1)), trainable=True)
+        initializer = tf.keras.initializers.GlorotUniform()
+        self.a = tf.Variable(initializer((nhid2, 1)), trainable=True) 
         self.attention = Attention(nhid2)
-        self.tanh = tf.keras.layers.Activation('tanh')
+        self.tanh = tf.keras.activations.tanh
 
         self.MLP = tf.keras.Sequential([
             tf.keras.layers.Dense(nclass),
