@@ -26,7 +26,6 @@ if __name__ == "__main__":
     tf.random.set_seed(0)
 
     sadj, fadj = load_graph(args.labelrate, config)
-    # sadj, fadj = load_graph_to_tensor("./data/imdb/spatial_matrix.pkl"), load_graph_to_tensor("./data/imdb/feature_matrix.pkl")
     features, labels, idx_train, idx_test = load_data(config)
     
     if args.model == "gcn":
