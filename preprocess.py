@@ -6,18 +6,42 @@ from keras.models import Sequential
 from keras.layers import Dense, Embedding, GlobalMaxPooling1D, Flatten, Conv1D, Dropout, Activation
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
-
+import re
 
 VOCAB_SIZE = 20000
 MAX_LEN = 100
 
-def preprocess(path):
+def preprocess_text(text):
+    # Lowercasing
+    text = text.lower()
+    
+    # Removing special characters and digits
+    text = re.sub(r'[^a-zA-Z\s]', '', text)
+    
+    # Tokenization
+    tokens = text.split()
+    
+    # Removing stopwords (you can define your own list of stopwords)
+    stopwords = {'is', 'the', 'and', 'that', 'this', 'to', 'of', 'a', 'an', 'in', 'for', 'with', 'on', 'at', 'by', 'from', 'it', 'as', 'has', 'have', 'was', 'were', 'be', 'been'}
+    tokens = [word for word in tokens if word not in stopwords]
+    
+    # Join tokens back into string
+    cleaned_text = ' '.join(tokens)
+    
+    return cleaned_text
+
+def preprocess(path, input_length=MAX_LEN, process_text=False):
     """takes in the dataset and returns the train_input, train_labels, test_input, test_labels in this order"""
     dataset = pq.ParquetDataset(path)
     
     data = dataset.read().to_pandas()
     inputs = data.iloc[:,0]
     labels = data.iloc[:,1]
+    
+    if labels.max() > 1:
+        labels = labels // labels.max()
+    if process_text:
+        inputs = inputs.apply(preprocess_text)
 
     # print("inputs: ", inputs)
     # print("labels: ", labels)
@@ -27,11 +51,12 @@ def preprocess(path):
     tokenizer.fit_on_texts(inputs)
     
     inputs = tokenizer.texts_to_sequences(inputs)
-    inputs = pad_sequences(inputs, maxlen=MAX_LEN, padding="post", value=0)
+    inputs = pad_sequences(inputs, maxlen=input_length, padding="post", value=0)
 
     # print('First sample after preprocessing: \n', inputs[0], '\n')
     return inputs, labels
-    
+
+preprocess('data/sts_gold_tweet.parquet', process_text=True)
 def shuffle(inputs, labels):
     indices = tf.random.shuffle(np.arange(len(inputs)))
     inputs = tf.gather(inputs, indices)
