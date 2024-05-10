@@ -7,23 +7,24 @@ Sentiment classification plays a crucial role in various applications such as so
 
 Clone the repo and install packages
 
-'''
-git clone 
+```
+git clone https://github.com/atcact/deep-sentiment.git
 cd deep-sentiment
 pip install -r requirements.txt
-'''
+```
 
 To run RNN and MC-CNN models:
 
-'''
+```bash
 python main.py --model [rnn/mccnn] --dataset [imdb/sts_gold]
-'''
+```
 
 To run GCN/AMGCN models:
 
-'''
-
-'''
+```bash
+cd models/amgcn
+python train.py 
+```
 
 ## Dataset
 

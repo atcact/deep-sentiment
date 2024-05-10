@@ -11,8 +11,8 @@ from config import Config
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = "2"
     parse = argparse.ArgumentParser()
-    parse.add_argument("-d", "--dataset", help="dataset", type=str, required=True)
-    parse.add_argument("-l", "--labelrate", help="labeled data for train per class", type = int, required = True)
+    parse.add_argument("-d", "--dataset", help="dataset", type=str, default="acm")
+    parse.add_argument("-l", "--labelrate", help="labeled data for train per class", type = int, default=20)
     args = parse.parse_args()
     
     path = Path(__file__)
