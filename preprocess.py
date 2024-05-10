@@ -50,17 +50,17 @@ def preprocess(path, input_length=MAX_LEN, process_text=False):
     # print("labels: ", labels)
     # print('First sample before preprocessing: \n', inputs[0], '\n')
 
-    stop_words = set(stopwords.words('english'))
-    # Remove stopwords and punctuation
-    stop_words = set(stopwords.words('english'))
-    punctuation = set(string.punctuation)
+    # stop_words = set(stopwords.words('english'))
+    # # Remove stopwords and punctuation
+    # stop_words = set(stopwords.words('english'))
+    # punctuation = set(string.punctuation)
 
-    def clean_text(text):
-        tokens = word_tokenize(text.lower())
-        tokens = [t for t in tokens if t not in stop_words and t not in punctuation]
-        return ' '.join(tokens)
+    # def clean_text(text):
+    #     tokens = word_tokenize(text.lower())
+    #     tokens = [t for t in tokens if t not in stop_words and t not in punctuation]
+    #     return ' '.join(tokens)
 
-    inputs = inputs.apply(clean_text)
+    # inputs = inputs.apply(clean_text)
 
     tokenizer = Tokenizer(num_words=VOCAB_SIZE)
     tokenizer.fit_on_texts(inputs)

@@ -22,6 +22,7 @@ class GraphConvolution(tf.keras.layers.Layer):
         support = tf.matmul(inputs, self.weight)
         output = tf.sparse.sparse_dense_matmul(adj, support)
         if self.bias is not None:
-            return output + self.bias
+            return tf.add(output, self.bias)  # output + self.bias
         else:
             return output
+        
