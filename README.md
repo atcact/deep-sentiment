@@ -13,6 +13,8 @@ cd deep-sentiment
 pip install -r requirements.txt
 ```
 
+Download datasets: Unzip acm.zip and citeseer.zip
+
 To run RNN and MC-CNN models:
 
 ```bash
@@ -20,6 +22,10 @@ python main.py --model [rnn/mccnn] --dataset [imdb/sts_gold]
 ```
 
 To run GCN/AMGCN models:
+
+```bash
+python models/am_gcn/main.py --model [gcn/amgcn] --dataset [acm/citeseer]
+```
 
 ```bash
 cd models/amgcn
